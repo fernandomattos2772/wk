@@ -1,0 +1,1 @@
+select * from pedidos where idcliente=55 and dtemissao='2025/01/31' order by idpedido desc

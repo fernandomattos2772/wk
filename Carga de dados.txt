@@ -1,0 +1,50 @@
+-- delete from clientes where codigo > 0;
+select * from clientes;
+select * from clientes order by uf, cidade;
+
+
+insert into clientes (Nome, Cidade, UF) values ('JONAS DA SILVA', 'CAMPINAS', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('MARIA COSTA E SILVA', 'VALINHOS', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('LEONARDO SENNA DA CRUZ', 'BELO HORIZONTE', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('SERGIO EDUARDO MENDES', 'CONTAGEM', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('NELSON ARAUJO CORREIA', 'AMPARO', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('MARLENA DE CASTRO', 'SERRA NEGRA', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('GERALDO CRUZ DE LIMA', 'BELO HORIZONTE', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('SIRLEY CUNHA DE FARIA', 'CONTAGEM', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('HELANA GOMES DE OLIVEIRA', 'RIO DE JANEIRO', 'RJ');
+insert into clientes (Nome, Cidade, UF) values ('SILVANA LIMA DE ARAUJO', 'VALINHOS', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('LEO SOARES DO NASCIMENTO', 'BELO HORIZONTE', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('ALVARES RIVALDO FIGUEREDO', 'CONTAGEM', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('NELSON BRAGA CORREIA', 'AMPARO', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('MARCELA CASTRO WILL', 'SERRA NEGRA', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('MARCOS CORREIA DE LIMA', 'AMPARO', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('MARLENA CASTILHO E SILVA', 'PARATI', 'RJ');
+insert into clientes (Nome, Cidade, UF) values ('GERALDO LEORNADO GIL', 'BELO HORIZONTE', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('FERNANDA CRISTINA GOMES', 'CONTAGEM', 'MG');
+insert into clientes (Nome, Cidade, UF) values ('VITORIA OLIVEIRA LUIZ', 'CAMPINAS', 'SP');
+insert into clientes (Nome, Cidade, UF) values ('SILVIA ARAUJO TONOI', 'RIO DE JANEIRO', 'RJ');
+
+
+-- delete from PRODUTOS where codigo > 0;
+select * from produtos order by descricao;
+
+insert into produtos (descricao, preco_venda) values ('CENOURA', 5.98);
+insert into produtos (descricao, preco_venda) values ('BATATA INGLESA', 7.80);
+insert into produtos (descricao, preco_venda) values ('SAL', 3.50);
+insert into produtos (descricao, preco_venda) values ('CEBOLA', 5.0);
+insert into produtos (descricao, preco_venda) values ('ALFACE', 3.80);
+insert into produtos (descricao, preco_venda) values ('COUVE', 3.0);
+insert into produtos (descricao, preco_venda) values ('QUEIJO', 11.40);
+insert into produtos (descricao, preco_venda) values ('MELANCIA', 4.15);
+insert into produtos (descricao, preco_venda) values ('TOMATE', 8.0);
+insert into produtos (descricao, preco_venda) values ('LEITE', 6.70);
+insert into produtos (descricao, preco_venda) values ('DOCE DE LEITE', 9.90);
+insert into produtos (descricao, preco_venda) values ('ARROZ', 33.30);
+insert into produtos (descricao, preco_venda) values ('FEIJAO', 9.0);
+insert into produtos (descricao, preco_venda) values ('ALHO', 4.25);
+insert into produtos (descricao, preco_venda) values ('LARANJA LIMA', 7.80);
+insert into produtos (descricao, preco_venda) values ('MUSSARELA FATIADA', 12.0);
+insert into produtos (descricao, preco_venda) values ('ARROZ INTEGRAL', 40.4);
+insert into produtos (descricao, preco_venda) values ('OLEO DE SOJA', 8.80);
+insert into produtos (descricao, preco_venda) values ('FARINHA DE TRIGO', 8.0);
+insert into produtos (descricao, preco_venda) values ('FERMENTO EM PO', 4.4);

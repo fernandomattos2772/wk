@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2025/01/29 12:27:48.000.518,=C:\Users\samue\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2025/01/29 16:57:45.000.160,C:\Users\samue\Documents\Embarcadero\Studio\Projects\Unit1.dfm=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\uVendas.dfm</Transaction>
+    <Transaction>2025/01/29 16:57:45.000.160,C:\Users\samue\Documents\Embarcadero\Studio\Projects\Unit1.pas=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\uVendas.pas</Transaction>
+    <Transaction>2025/01/29 17:00:05.000.141,C:\Users\samue\Documents\Embarcadero\Studio\Projects\Project1.dproj=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\TesteVendas.dproj</Transaction>
+    <Transaction>2025/01/29 17:03:49.000.026,=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\Unit1.pas</Transaction>
+    <Transaction>2025/01/29 17:04:36.000.960,C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\uDMvendas.pas=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\Unit1.pas</Transaction>
+    <Transaction>2025/01/29 17:04:36.000.960,C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\uDMvendas.dfm=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\Unit1.dfm</Transaction>
+    <Transaction>2025/01/29 18:24:46.000.861,=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\Unit1.pas</Transaction>
+    <Transaction>2025/01/29 18:25:24.000.269,C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\uFuncoes.pas=C:\Users\samue\Documents\WinAcer2024\Doctos\AndressaWolf\Unit1.pas</Transaction>
+  </Transactions>
+</BorlandProject>

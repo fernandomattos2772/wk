@@ -1,0 +1,433 @@
+unit uFuncoes;
+
+{
+DBeaver:
+Ctrl+Shift+Y    Texto selecionado para minusculo
+
+
+Label1.Caption := 'Processado '+IntToStr(i0);
+Application.ProcessMessages;
+}
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, Forms, Controls, Graphics, Dialogs, ExtCtrls, ComCtrls,
+  Buttons, ActnList, Printers, Windows;
+
+  function splitVar(pVar, pQuebra, pSort: String) : TStringList;
+  function splitAltPos(s1,s2: String; iPos: Integer): String;
+
+  function qryGeral(pSQL: String): Integer;
+  function qryObs(pSQL: String): Integer;
+  function qryPessoa(pSQL: String): Integer;
+
+  procedure execGeral(pSQL: String);
+  procedure execObs(pSQL: String);
+  procedure execPessoa(pSQL: String);
+
+  function splitPos(sVar: String; iPos: Integer): String;
+  function Aspas(sVar: string; iPerc: Word): string;
+  function AspasDTHR(sDT, sTime: string): string;
+  function Cripto_ON(P_VAR: string): string;
+  function Cripto_OFF(P_VAR: string): string;
+  function strZero(iVar,iLen: Integer; sZero:Char): String;
+  procedure iniciaVars;
+  procedure GravaArqTxt(sArqTxt, sTx: String);
+  procedure LeArqTxt1(sArq:String);
+  Function IsDate(sData:String): Boolean;
+  Function IsTime(sTime:String): String;
+  function retiraAcentos(const pText: string): string;
+  function diaSemana(pDT: String; pLen: Integer): String;
+  procedure MakeRounded(Control: TWinControl; r20, r5: Integer);
+
+{
+Const
+  sPreFixo = 'ATSE';
+  sUserTop = 'DIRETORIA';
+}
+
+var
+   F0,F1,F2: TextFile;
+   sIDg,sUser,sSQL: String;
+   iLst,iLnh: Integer;
+   bOK : Boolean;
+   lstAbas,lstCmps,lstIni,lstVar,lstLn1,lstLn2,lstSQL: TStringList;
+implementation
+
+uses uDM;
+
+function diaSemana(pDT: String; pLen: Integer): String;
+const
+  DiasSemana: array[1..7] of string = ('Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado');
+var Dia: word;
+begin
+  Result := '';
+  if pDT<>'' then begin
+    Dia    := DayOfWeek(StrToDate(Copy(pDT,1,10)));
+    Result := Copy(DiasSemana[Dia],1,pLen);
+  end;
+end;
+
+function splitVar(pVar, pQuebra, pSort: String) : TStringList;
+var i0: Integer;
+   sTxt: String;
+begin
+  Result        := TStringList.Create;
+  Result.Sorted := False;
+  sTxt          := '';
+  if pVar='' then begin
+    gravaArqTxt('SQL.txt', #13+'[Erro x splitVar] '+DateToStr(Date())+'-'+TimeToStr(Time())+' >>> '+Copy(pSort,2,9999));
+    ShowMessage('ATENÇÃO: Erro na função splitVar (pVar sem valor) !!!'+#13+Copy(pSort,2,9999));
+    Result := Nil;
+    Exit;
+  end;
+  if Pos(pQuebra, pVar)=0 then
+    pVar := pVar + pQuebra;
+  Result.Clear;                                       // o índice inicia em zero
+  for i0 := 1 to Length(pVar) do begin
+    if Copy(pVar,i0,Length(pQuebra)) <> pQuebra then
+      sTxt := sTxt + Copy(pVar,i0,Length(pQuebra))
+    else begin
+      Result.Add(sTxt);
+      sTxt := '';
+    end;
+  end;
+  if sTxt<>'' then
+    Result.Add(sTxt);
+  if Copy(pSort,1,1)='S' then
+     Result.Sorted := True;
+  iLst := Result.Count;
+end;
+
+procedure iniciaVars;
+begin
+  lstVar  := TStringList.Create;
+  lstLn1  := TStringList.Create;
+  lstLn2  := TStringList.Create;
+  lstIni  := TStringList.Create;
+  lstSQL  := TStringList.Create;
+  lstAbas := TStringList.Create;
+  lstCmps := TStringList.Create;
+  lstVar.Clear;
+  lstLn1.Clear;
+  lstLn2.Clear;
+  lstIni.Clear;
+  lstSQL.Clear;
+  lstAbas.Clear;
+  lstCmps.Clear;
+end;
+
+procedure GravaArqTxt(sArqTxt, sTx: String);
+begin
+   AssignFile(F1, sArqTxt);
+   if FileExists(sArqTxt) then
+     Append(F1)
+   else
+     ReWrite(F1);
+   WriteLn(F1, sTx);
+   Inc(iLnh);
+   CloseFile(F1);
+end;
+
+procedure LeArqTxt1(sArq:String);
+var sTxt: String;
+begin
+  lstLn1.Clear;
+  if FileExists(sArq) then begin
+    AssignFile(F1, sArq);
+    Reset(F1);
+    While (Not Eof(F1)) do begin
+      ReadLn(F1, sTxt);
+      lstLn1.Add(sTxt);
+    end;
+    CloseFile(F1);
+  end;
+end;
+
+function retiraAcentos(const pText: string): string;
+type
+  USAscii20127 = type AnsiString(20127);
+begin
+  Result := string(USAscii20127(pText));
+end;
+
+function splitPos(sVar: String; iPos: Integer): String;
+begin
+  lstLn1 := splitVar(sVar+';;;;;', ';', 'N151');
+  Result := lstLn1[iPos];
+end;
+
+function Aspas(sVar: string; iPerc: Word): string;
+begin
+  sVar := TrimRight(sVar);
+  if iPerc = 0 then
+    Aspas := #39 + sVar + #39
+  else
+    if iPerc = 1 then
+      Aspas := #39 + sVar + '%' + #39
+    else
+      Aspas := #39 + '%' + sVar + '%' + #39;
+end;
+
+function AspasDTHR(sDT, sTime: string): string;
+begin
+  if Copy(sDT + '  ', 1, 2) <> '  ' then begin
+    if sTime <> '' then
+      AspasDTHR := #39 + FormatDateTime('YYYY/MM/DD' + ' HH:MM:SS', StrToDateTime(sDT + ' ' + sTime)) + #39
+    else
+      AspasDTHR := #39 + FormatDateTime('YYYY/MM/DD', StrToDateTime(sDT)) + #39;
+  end else begin
+    AspasDTHR := 'null';
+  end;
+end;
+
+function Cripto_ON(P_VAR: string): string;
+var W_RET: string;
+  W_I: Integer;
+begin
+  W_RET := '';
+  for W_I := 1 to Length(P_VAR) do begin
+    if Odd(W_I) then
+      W_RET := W_RET + Chr((13 + Ord(P_VAR[W_I])))
+    else
+      W_RET := W_RET + Chr((20 + Ord(P_VAR[W_I]))); // + 100
+  end;
+  Cripto_ON := W_RET;
+end;
+
+function Cripto_OFF(P_VAR: string): string;
+var W_RET: string;
+  W_I: Integer;
+begin
+  W_RET := '';
+  for W_I := 1 to Length(P_VAR) do begin
+    if Odd(W_I) then
+      W_RET := W_RET + Chr((Ord(P_VAR[W_I]) - 13))
+    else
+      W_RET := W_RET + Chr((Ord(P_VAR[W_I]) - 20)); // - 100
+  end;
+  Cripto_OFF := W_RET;
+end;
+
+function splitAltPos(s1,s2: String; iPos: Integer): String;
+var i0: Integer;
+  lstA: TStringList;
+begin
+  lstA       := splitVar(s1, ';', 'N211');
+  lstA[iPos] := s2;
+  Result     := '';
+
+  for i0 := 0 to lstA.Count-1 do
+    Result := Result+lstA[i0]+';';
+
+  Result := Copy(Result,1,Length(Result)-1);
+  lstA.Clear;
+end;
+
+function strZero(iVar,iLen: Integer; sZero:Char): String;
+begin
+  Result := IntToStr(iVar);
+  Result := StringOfChar(sZero, iLen-Length(Result))+Result;
+end;
+
+Function IsDate(sData:String): Boolean;
+var T: TDateTime;
+Begin
+  Try
+    T      := StrToDateTime(sData);
+    Result := True;
+    T      := T + 1;
+  except
+    Result := False;
+    T      := T - 1;
+  end;
+end;
+
+Function IsTime(sTime:String): String;
+var sOK: String;
+  i0: Integer;
+Begin
+  sTime  := Copy(sTime+':00',1,8);
+  sOK    := sTime;
+  for i0 := 1 to 8 do begin
+    if Pos(Copy(sTime,i0,1),'1234567890:')=0 then begin
+      sOK := '';
+      Break;
+    end;
+  end;
+  if sOK<>'' then begin
+    lstLn1 := splitVar(sOK,':','N254');
+    if (lstLn1.Count<>3)
+    or (Length(lstLn1[0])<>2) or (Length(lstLn1[1])<>2) or (Length(lstLn1[2])<>2)
+    or (lstLn1[0]>'23') or (lstLn1[1]>'59') or (lstLn1[2]>'59') then
+      sOK := '';
+  end;
+  Result := sOK;
+end;
+
+procedure execObs(pSQL: String);
+begin
+  lstLn2 := splitVar(pSQL,';','N265');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  DM.qryObs.Close;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[execObs] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryObs.SQL.Text := pSQL;
+  DM.qryObs.ExecSQL;
+end;
+
+procedure execGeral(pSQL: String);
+begin
+  lstLn2 := splitVar(pSQL,';','N283');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  DM.qryGeral.Close;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[execGeral] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryGeral.SQL.Text := pSQL;
+  DM.qryGeral.ExecSQL;
+end;
+
+function qryGeral(pSQL: String): Integer;
+var sID,uSQL: String;
+begin
+  lstLn2 := splitVar(pSQL,';','N302');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  uSQL := UpperCase(retiraAcentos(pSQL));
+  sID  := Trim(Copy(uSQL,Pos('FROM',uSQL)+5,999));
+  sID  := Trim(Copy(sID,1,Pos(' ',sID)-1));
+  if sID='GERAL' then
+    sID := 'IdGeral'                // somente a tabela GERAL não vai usar o "_"
+  else
+    if Copy(sID,1,3)<>'ID_' then
+      sID := 'ID_'+sID;          // todas as tabelas <> GERAL vão usar ID_ na PK
+
+  DM.qryGeral.Close;
+  DM.qryGeral.SQL.Text := pSQL;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[qryGeral] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryGeral.Open;
+  DM.qryGeral.First;
+  sIDg   := DM.qryGeral.FieldByName(sID).AsString;
+  result := DM.qryGeral.RecordCount;
+end;
+
+function qryObs(pSQL: String): Integer;
+begin
+  lstLn2 := splitVar(pSQL,';','N332');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  DM.qryObs.Close;
+  DM.qryObs.SQL.Text := pSQL;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[qryObs] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryObs.Open;
+  DM.qryObs.First;
+
+  sIDg   := Copy(pSQL,Pos('from ',pSQL),9999);
+  lstLn2 := splitVar(sIDg,' ','N349');
+  sIDg   := 'ID_'+lstLn2[1];
+  if lstLn2[1]='GERAL' then
+    sIDg := 'IDGERAL';
+
+  sIDg   := DM.qryObs.FieldByName(sIDg).AsString;
+  result := DM.qryObs.RecordCount;
+end;
+
+function qryPessoa(pSQL: String): Integer;
+begin
+  lstLn2 := splitVar(pSQL,';','N360');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  DM.qryPessoa.Close;
+  DM.qryPessoa.SQL.Text := pSQL;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[qryPessoa] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryPessoa.Open;
+  DM.qryPessoa.First;
+
+  sIDg   := Copy(pSQL,Pos('from ',pSQL),9999);
+  lstLn2 := splitVar(sIDg,' ','N377');
+  sIDg   := 'ID_'+lstLn2[1];
+  if lstLn2[1]='GERAL' then
+    sIDg := 'IDGERAL';
+
+  sIDg   := DM.qryPessoa.FieldByName(sIDg).AsString;
+  result := DM.qryPessoa.RecordCount;
+  lstSQL := splitVar(pSQL,#13,'N384');
+end;
+
+procedure execPessoa(pSQL: String);
+begin
+  lstLn2 := splitVar(pSQL,';','N389');
+  if lstLn2.Count=2 then
+    pSQL := lstLn2[1]
+  else
+    lstLn2[0] := '';
+
+  pSQL := retiraAcentos(pSQL);
+  DM.qryPessoa.Close;
+
+  if FileExists('c:\src\dev.ini') then
+    gravaArqTxt('SQL.txt', lstLn2[0]+'[execPessoa] '+DateToStr(Date())+'-'+TimeToStr(Time())+' : '+pSQL);
+
+  DM.qryPessoa.SQL.Text := pSQL;
+  DM.qryPessoa.ExecSQL;
+end;
+
+procedure MakeRounded(Control: TWinControl; r20, r5: Integer);
+var
+  R : TRect;
+  Rgn: HRGN;
+begin
+  With Control do
+  begin
+    if Tag<>-1 then begin
+      R := ClientRect;
+      Rgn := CreateRoundRectRgn(R.Left+3, R.Top+5+Control.HelpContext, R.Right-2, R.Bottom-2, r20, r20);
+      Perform(EM_GETRECT, 0, lParam(@R));
+      InflateRect(R, r5, r5);
+      Perform(EM_SETRECTNP, 0, lParam(@R));
+      SetWindowRgn(Handle, Rgn, True);
+      //Invalidade;
+    end;
+  end;
+end;
+
+end.
+
