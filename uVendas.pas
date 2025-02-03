@@ -48,6 +48,7 @@ type
     procedure limpaCliente;
     procedure consultaPedidos;
     procedure pegaItens;
+    procedure excluiPedido;
     procedure LabeledEdit7Enter(Sender: TObject);
     procedure LabeledEdit4KeyPress(Sender: TObject; var Key: Char);
     procedure LabeledEdit3KeyPress(Sender: TObject; var Key: Char);
@@ -118,7 +119,30 @@ begin
 
     if DMvendas.qryGeral.RecordCount=0 then
     begin
-      ShowMessage('Pedido não encontrado no sistema !');
+      ShowMessage('Pedido x iten(s) não encontrados no sistema !');
+
+      DMvendas.qryGeral.SQL.Clear;
+      DMvendas.qryGeral.SQL.Add(
+        'select B.idpedido,B.idcliente'+
+        ' from pedidos B, clientes C'+
+        ' where B.idpedido='+edtPedido.Text+
+        ' and C.codigo=B.idcliente'
+      );
+      DMvendas.qryGeral.Open;
+      if DMvendas.qryGeral.RecordCount>0 then
+      begin
+        DMvendas.qryCli.SQL.Clear;
+        DMvendas.qryCli.SQL.Add('select * from clientes where codigo='+
+          DMvendas.qryGeral.FieldByName('idcliente').AsString);
+        DMvendas.qryCli.Open;
+
+        pegaCliente;
+        PedAtual.Text  := edtPedido.Text;
+        TotPedido.Text := formatfloat('R$ ###,##0.#0', 0);
+        ShowMessage('Existe o pedido aberto sem itens de venda !');
+        excluiPedido;
+      end;
+
       Exit;
     end;
     PedAtual.Text := edtPedido.Text;
@@ -132,28 +156,7 @@ begin
     pegaItens;
 
     if edtPedido.Tag=1 then
-    begin
-      if MessageDlg('Confirma a EXCLUSÃO do pedido de venda '+edtPedido.Text+' ?',mtWarning,[mbYEs,mbNo],0)=mrYes then
-      begin
-        DMvendas.gravaReg.SQL.Clear;
-        DMvendas.gravaReg.SQL.Add('delete from pedidos_produtos where idpedido='+edtPedido.Text);
-        DMvendas.gravaReg.ExecSQL;
-
-        DMvendas.gravaReg.SQL.Clear;
-        DMvendas.gravaReg.SQL.Add('delete from pedidos where idpedido='+edtPedido.Text);
-        DMvendas.gravaReg.ExecSQL;
-
-        ShowMessage('Pedido '+edtPedido.Text+' EXCLUÍDO com sucesso !');
-      end;
-
-      LabeledEdit6.SetFocus;
-      limpaCliente;
-      PedAtual.Text := '-9999';
-      pegaItens;
-      PedAtual.Text := '';
-      limpaCliente;
-      consultaPedidos;
-    end;
+      excluiPedido;
   end;
 end;
 
@@ -551,6 +554,30 @@ begin
     spdCancela.Visible  := False;
     edtPedido.Visible   := False;
   end;
+end;
+
+procedure TfrmVendas.excluiPedido;
+begin
+  if MessageDlg('Confirma a EXCLUSÃO do pedido de venda '+edtPedido.Text+' ?',mtWarning,[mbYEs,mbNo],0)=mrYes then
+  begin
+    DMvendas.gravaReg.SQL.Clear;
+    DMvendas.gravaReg.SQL.Add('delete from pedidos_produtos where idpedido='+edtPedido.Text);
+    DMvendas.gravaReg.ExecSQL;
+
+    DMvendas.gravaReg.SQL.Clear;
+    DMvendas.gravaReg.SQL.Add('delete from pedidos where idpedido='+edtPedido.Text);
+    DMvendas.gravaReg.ExecSQL;
+
+    ShowMessage('Pedido '+edtPedido.Text+' EXCLUÍDO com sucesso !');
+  end;
+
+  LabeledEdit6.SetFocus;
+  limpaCliente;
+  PedAtual.Text := '-9999';
+  pegaItens;
+  PedAtual.Text := '';
+  limpaCliente;
+  consultaPedidos;
 end;
 
 end.
